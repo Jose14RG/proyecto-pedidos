@@ -33,14 +33,15 @@ useEffect(() => {
     .catch(err => console.error("Error al obtener empresas:", err));
 }, []);
 
-  // Cargar menú al seleccionar empresa
-  useEffect(() => {
-    if (empresaSel) {
-      axios.get(`http://localhost:5000/api/menus/${empresaSel.id}`)
-        .then(res => setMenus(res.data))
-        .catch(err => console.error("Error al obtener menús:", err));
-    }
-  }, [empresaSel]);
+// Cargar menú al seleccionar empresa
+useEffect(() => {
+  if (empresaSel) {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    axios.get(`${API_URL}/api/menus/${empresaSel.id}`)
+      .then(res => setMenus(res.data))
+      .catch(err => console.error("Error al obtener menús:", err));
+  }
+}, [empresaSel]);
 
   // Cargar pedidos para admin
   useEffect(() => {
