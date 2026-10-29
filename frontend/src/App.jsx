@@ -26,22 +26,21 @@ export default function App() {
 
   const API_URL = import.meta.env.VITE_API_URL || 'https://pedidos-backend-a7d0.onrender.com';
 
-// Cargar empresas
-useEffect(() => {
-  axios.get(`${API_URL}/api/empresas`)
-    .then(res => setEmpresas(res.data))
-    .catch(err => console.error("Error al obtener empresas:", err));
-}, []);
+  // Cargar empresas
+  useEffect(() => {
+    axios.get(`${API_URL}/api/empresas`)
+      .then(res => setEmpresas(res.data))
+      .catch(err => console.error("Error al obtener empresas:", err));
+  }, []);
 
-// Cargar menú al seleccionar empresa
-useEffect(() => {
-  if (empresaSel) {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    axios.get(`${API_URL}/api/menus/${empresaSel.id}`)
-      .then(res => setMenus(res.data))
-      .catch(err => console.error("Error al obtener menús:", err));
-  }
-}, [empresaSel]);
+  // Cargar menú al seleccionar empresa
+  useEffect(() => {
+    if (empresaSel) {
+      axios.get(`${API_URL}/api/menus/${empresaSel.id}`)
+        .then(res => setMenus(res.data))
+        .catch(err => console.error("Error al obtener menús:", err));
+    }
+  }, [empresaSel]);
 
   // Cargar pedidos para admin
   useEffect(() => {
@@ -81,23 +80,34 @@ useEffect(() => {
       detalles: carrito
     };
 
-axios.post(`${API_URL}/api/pedidos`, datosPedido)
-    .then(res => {
-      setUltimoPedidoId(res.data.pedidoId);
-      setCarrito([]);
-      setEmpresaSel(null);
-    })
-  .catch(err => console.error("Error al enviar pedido:", err));
+    axios.post(`${API_URL}/api/pedidos`, datosPedido)
+      .then(res => {
+        setUltimoPedidoId(res.data.pedidoId);
+        setCarrito([]);
+        setEmpresaSel(null);
+      })
+      .catch(err => console.error("Error al enviar pedido:", err));
   };
-axios.post
+
   const buscarEstadoPedido = () => {
     if (!codigoBusqueda) return;
-axios.get(`${API_URL}/api/pedidos/consultar/${codigoBusqueda}`)
+    axios.get(`${API_URL}/api/pedidos/consultar/${codigoBusqueda}`)
       .then(res => setPedidoConsultado(res.data))
       .catch(() => {
         alert("Pedido no encontrado");
         setPedidoConsultado(null);
       });
+  };
+
+  // Función para cambiar el estado del pedido desde el panel de administración
+  const cambiarEstadoPedido = (id, nuevoEstado) => {
+    axios.put(`${API_URL}/api/pedidos/${id}/estado`, { estado: nuevoEstado })
+      .then(() => {
+        setPedidosAdmin(prevPedidos =>
+          prevPedidos.map(p => p.id === id ? { ...p, estado: nuevoEstado } : p)
+        );
+      })
+      .catch(() => alert("Error al cambiar el estado del pedido"));
   };
 
   return (
@@ -126,10 +136,33 @@ axios.get(`${API_URL}/api/pedidos/consultar/${codigoBusqueda}`)
           ) : (
             <ul style={{ listStyle: 'none', padding: 0 }}>
               {pedidosAdmin.map(p => (
-                <li key={p.id} style={{ background: '#0f172a', padding: '12px', marginBottom: '8px', borderRadius: '6px' }}>
+                <li key={p.id} style={{ background: '#0f172a', padding: '15px', marginBottom: '12px', borderRadius: '6px', border: '1px solid #334155' }}>
                   <strong>ID: #{p.id}</strong> | <strong>Cliente:</strong> {p.cliente_nombre} ({p.cliente_telefono}) <br/>
                   <strong>Dirección:</strong> {p.cliente_direccion} | <strong>Negocio ID:</strong> {p.empresa_id} <br/>
-                  <strong>Total:</strong> Q{Number(p.total).toFixed(2)} | <strong>Entrega:</strong> {p.horario_entrega} | <strong>Estado:</strong> {p.estado}
+                  <strong>Total:</strong> Q{Number(p.total).toFixed(2)} | <strong>Entrega:</strong> {p.horario_entrega} <br/>
+                  <strong>Estado actual:</strong> <span style={{ color: p.estado === 'Completado' ? '#4ade80' : p.estado === 'En Proceso' ? '#fbbf24' : '#f87171', fontWeight: 'bold' }}>{p.estado || 'Pendiente'}</span>
+                  
+                  {/* Botones de acción para Atención al Cliente */}
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '12px', flexWrap: 'wrap' }}>
+                    <button 
+                      onClick={() => cambiarEstadoPedido(p.id, 'En Proceso')}
+                      style={{ background: '#d97706', color: '#fff', padding: '6px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                      ⏳ En Proceso
+                    </button>
+                    <button 
+                      onClick={() => cambiarEstadoPedido(p.id, 'Completado')}
+                      style={{ background: '#16a34a', color: '#fff', padding: '6px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                      ✅ Completado
+                    </button>
+                    <button 
+                      onClick={() => cambiarEstadoPedido(p.id, 'Cancelado')}
+                      style={{ background: '#dc2626', color: '#fff', padding: '6px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                      ❌ Cancelado
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
