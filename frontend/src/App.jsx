@@ -81,14 +81,12 @@ useEffect(() => {
       detalles: carrito
     };
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
 axios.post(`${API_URL}/api/pedidos`, datosPedido)
-  .then(res => {
-    setUltimoPedidoId(res.data.pedidoId);
-    setCarrito([]);
-    setEmpresaSel(null);
-  })
+    .then(res => {
+      setUltimoPedidoId(res.data.pedidoId);
+      setCarrito([]);
+      setEmpresaSel(null);
+    })
   .catch(err => console.error("Error al enviar pedido:", err));
   };
 axios.post
