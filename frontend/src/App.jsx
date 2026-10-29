@@ -108,7 +108,6 @@ export default function App() {
     e.preventDefault();
     if (!empresaAdminSel) return alert("Selecciona tu restaurante");
     
-    // Validar código (por defecto '1234' o el que tenga configurado)
     const codigoValido = empresaAdminSel.codigo_acceso || '1234';
     if (codigoIngresado === codigoValido) {
       setAdminAutenticado(true);
@@ -252,49 +251,82 @@ export default function App() {
               </button>
             </div>
           ) : !usuarioRegistrado ? (
-            /* PASO 1: LOGIN CLIENTE */
-            <div style={{ maxWidth: '400px', margin: '40px auto', background: '#1e293b', padding: '25px', borderRadius: '8px', border: '1px solid #334155' }}>
-              <h2>Identifícate para continuar</h2>
-              <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '15px' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '5px' }}><User size={16} /> Tu Nombre:</label>
+            /* PASO 1: LOGIN CLIENTE + BUSCADOR DE ESTADO RÁPIDO */
+            <div style={{ maxWidth: '400px', margin: '30px auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              
+              {/* Formulario de Identificación */}
+              <div style={{ background: '#1e293b', padding: '25px', borderRadius: '8px', border: '1px solid #334155' }}>
+                <h2>Identifícate para continuar</h2>
+                <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '15px' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '5px' }}><User size={16} /> Tu Nombre:</label>
+                    <input 
+                      type="text" 
+                      value={nombre} 
+                      onChange={e => setNombre(e.target.value)} 
+                      placeholder="Ej. José Pérez"
+                      style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #334155', background: '#0f172a', color: '#fff' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '5px' }}><Phone size={16} /> Teléfono:</label>
+                    <input 
+                      type="text" 
+                      value={telefono} 
+                      onChange={e => setTelefono(e.target.value)} 
+                      placeholder="Ej. 5555-1234"
+                      style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #334155', background: '#0f172a', color: '#fff' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '5px' }}><MapPin size={16} /> Dirección de Entrega:</label>
+                    <input 
+                      type="text" 
+                      value={direccion} 
+                      onChange={e => setDireccion(e.target.value)} 
+                      placeholder="Ej. Zona 1, Casa o Bufete"
+                      style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #334155', background: '#0f172a', color: '#fff' }}
+                    />
+                  </div>
+                  <button type="submit" style={{ padding: '10px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+                    Continuar a Establecimientos
+                  </button>
+                </form>
+              </div>
+
+              {/* Buscador de Estado de Pedido (Añadido también aquí) */}
+              <div style={{ padding: '20px', background: '#1e293b', borderRadius: '8px', border: '1px solid #334155' }}>
+                <h3 style={{ fontSize: '1.1rem', marginBottom: '10px' }}>¿Ya tienes un pedido en curso?</h3>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <Search size={20} />
                   <input 
                     type="text" 
-                    value={nombre} 
-                    onChange={e => setNombre(e.target.value)} 
-                    placeholder="Ej. José Pérez"
-                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #334155', background: '#0f172a', color: '#fff' }}
+                    placeholder="Número de pedido (ej. 1)" 
+                    value={codigoBusqueda}
+                    onChange={e => setCodigoBusqueda(e.target.value)}
+                    style={{ padding: '8px', borderRadius: '4px', border: '1px solid #334155', background: '#0f172a', color: '#fff', flex: 1 }}
                   />
+                  <button onClick={buscarEstadoPedido} style={{ padding: '8px 15px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                    Consultar
+                  </button>
                 </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '5px' }}><Phone size={16} /> Teléfono:</label>
-                  <input 
-                    type="text" 
-                    value={telefono} 
-                    onChange={e => setTelefono(e.target.value)} 
-                    placeholder="Ej. 5555-1234"
-                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #334155', background: '#0f172a', color: '#fff' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '5px' }}><MapPin size={16} /> Dirección de Entrega:</label>
-                  <input 
-                    type="text" 
-                    value={direccion} 
-                    onChange={e => setDireccion(e.target.value)} 
-                    placeholder="Ej. Zona 1, Casa o Bufete"
-                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #334155', background: '#0f172a', color: '#fff' }}
-                  />
-                </div>
-                <button type="submit" style={{ padding: '10px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
-                  Continuar a Establecimientos
-                </button>
-              </form>
+
+                {pedidoConsultado && (
+                  <div style={{ marginTop: '15px', padding: '12px', background: '#0f172a', border: '1px solid #3b82f6', borderRadius: '6px' }}>
+                    <h4>🔍 Estado del Pedido #{pedidoConsultado.id}</h4>
+                    <p style={{ margin: '4px 0' }}><strong>Negocio:</strong> {pedidoConsultado.empresa_nombre}</p>
+                    <p style={{ margin: '4px 0' }}><strong>Total:</strong> Q{Number(pedidoConsultado.total).toFixed(2)}</p>
+                    <p style={{ margin: '4px 0' }}><strong>Entrega:</strong> {pedidoConsultado.horario_entrega}</p>
+                    <p style={{ margin: '4px 0' }}><strong>Estado:</strong> <span style={{ color: '#38bdf8', fontWeight: 'bold' }}>{pedidoConsultado.estado || 'Pendiente'}</span></p>
+                  </div>
+                )}
+              </div>
+
             </div>
           ) : (
-            /* PASO 2: SELECCIÓN Y CONSULTA DE ESTADO */
+            /* PASO 2: SELECCIÓN Y CONSULTA DE ESTADO DESPUÉS DE LOGuearse */
             <div>
-              {/* Buscador de Estado de Pedido para el Cliente */}
+              {/* Buscador de Estado de Pedido */}
               <div style={{ marginBottom: '25px', padding: '15px', background: '#1e293b', borderRadius: '8px', display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <Search size={20} />
                 <input 
@@ -311,7 +343,7 @@ export default function App() {
 
               {pedidoConsultado && (
                 <div style={{ marginBottom: '25px', padding: '15px', background: '#0f172a', border: '1px solid #3b82f6', borderRadius: '8px' }}>
-                  <h4>🔍 Estado de tu Pedido #{pedidoConsultado.id}</h4>
+                  <h4>🔍 Estado del Pedido #{pedidoConsultado.id}</h4>
                   <p><strong>Negocio:</strong> {pedidoConsultado.empresa_nombre}</p>
                   <p><strong>Total:</strong> Q{Number(pedidoConsultado.total).toFixed(2)}</p>
                   <p><strong>Hora de Entrega:</strong> {pedidoConsultado.horario_entrega}</p>
