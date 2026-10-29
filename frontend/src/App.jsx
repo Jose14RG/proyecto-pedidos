@@ -46,7 +46,7 @@ useEffect(() => {
   // Cargar pedidos para admin
   useEffect(() => {
     if (verAdmin) {
-      axios.get('http://localhost:5000/api/pedidos')
+      axios.get(`${API_URL}/api/pedidos`)
         .then(res => setPedidosAdmin(res.data))
         .catch(err => console.error("Error al obtener pedidos:", err));
     }
