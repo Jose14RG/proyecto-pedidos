@@ -92,7 +92,7 @@ axios.post(`${API_URL}/api/pedidos`, datosPedido)
 axios.post
   const buscarEstadoPedido = () => {
     if (!codigoBusqueda) return;
-    axios.get(`http://localhost:5000/api/pedidos/consultar/${codigoBusqueda}`)
+axios.get(`${API_URL}/api/pedidos/consultar/${codigoBusqueda}`)
       .then(res => setPedidoConsultado(res.data))
       .catch(() => {
         alert("Pedido no encontrado");
